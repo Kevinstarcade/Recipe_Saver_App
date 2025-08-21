@@ -1,0 +1,107 @@
+﻿@page "/recipes/delete"
+@using Microsoft.EntityFrameworkCore
+@using Recipe_Saver_App.Models
+@inject IDbContextFactory<Recipe_Saver_App.Data.RecipesContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Recipe</h2>
+    <hr />
+    @if (recipe is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">RecipeName</dt>
+            <dd class="col-sm-10">@recipe.RecipeName</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">VideoUrl</dt>
+            <dd class="col-sm-10">@recipe.VideoUrl</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Platform</dt>
+            <dd class="col-sm-10">@recipe.Platform</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CuisineType</dt>
+            <dd class="col-sm-10">@recipe.CuisineType</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">MealType</dt>
+            <dd class="col-sm-10">@recipe.MealType</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CaloriesPerServing</dt>
+            <dd class="col-sm-10">@recipe.CaloriesPerServing</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">FatPerServing</dt>
+            <dd class="col-sm-10">@recipe.FatPerServing</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CarbsPerServing</dt>
+            <dd class="col-sm-10">@recipe.CarbsPerServing</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">ProteinPerServing</dt>
+            <dd class="col-sm-10">@recipe.ProteinPerServing</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">IsFavourite</dt>
+            <dd class="col-sm-10">@recipe.IsFavourite</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">PlanToCook</dt>
+            <dd class="col-sm-10">@recipe.PlanToCook</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Rating</dt>
+            <dd class="col-sm-10">@recipe.Rating</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">LastMade</dt>
+            <dd class="col-sm-10">@recipe.LastMade</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Notes</dt>
+            <dd class="col-sm-10">@recipe.Notes</dd>
+        </dl>
+        <EditForm method="post" Model="recipe" OnValidSubmit="DeleteRecipe" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(recipe is null)">Delete</button> |
+            <a href="/recipes">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Recipe? recipe;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        recipe = await context.Recipes.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (recipe is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteRecipe()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Recipes.Remove(recipe!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/recipes");
+    }
+}

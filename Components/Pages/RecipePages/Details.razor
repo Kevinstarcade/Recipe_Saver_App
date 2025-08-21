@@ -1,0 +1,72 @@
+﻿@page "/recipes/details"
+@using Microsoft.EntityFrameworkCore
+@using Recipe_Saver_App.Models
+@inject IDbContextFactory<Recipe_Saver_App.Data.RecipesContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Recipe</h2>
+    <hr />
+    @if (recipe is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">RecipeName</dt>
+            <dd class="col-sm-10">@recipe.RecipeName</dd>
+            <dt class="col-sm-2">VideoUrl</dt>
+            <dd class="col-sm-10">@recipe.VideoUrl</dd>
+            <dt class="col-sm-2">Platform</dt>
+            <dd class="col-sm-10">@recipe.Platform</dd>
+            <dt class="col-sm-2">CuisineType</dt>
+            <dd class="col-sm-10">@recipe.CuisineType</dd>
+            <dt class="col-sm-2">MealType</dt>
+            <dd class="col-sm-10">@recipe.MealType</dd>
+            <dt class="col-sm-2">CaloriesPerServing</dt>
+            <dd class="col-sm-10">@recipe.CaloriesPerServing</dd>
+            <dt class="col-sm-2">FatPerServing</dt>
+            <dd class="col-sm-10">@recipe.FatPerServing</dd>
+            <dt class="col-sm-2">CarbsPerServing</dt>
+            <dd class="col-sm-10">@recipe.CarbsPerServing</dd>
+            <dt class="col-sm-2">ProteinPerServing</dt>
+            <dd class="col-sm-10">@recipe.ProteinPerServing</dd>
+            <dt class="col-sm-2">IsFavourite</dt>
+            <dd class="col-sm-10">@recipe.IsFavourite</dd>
+            <dt class="col-sm-2">PlanToCook</dt>
+            <dd class="col-sm-10">@recipe.PlanToCook</dd>
+            <dt class="col-sm-2">Rating</dt>
+            <dd class="col-sm-10">@recipe.Rating</dd>
+            <dt class="col-sm-2">LastMade</dt>
+            <dd class="col-sm-10">@recipe.LastMade</dd>
+            <dt class="col-sm-2">Notes</dt>
+            <dd class="col-sm-10">@recipe.Notes</dd>
+        </dl>
+        <div>
+            <a href="@($"/recipes/edit?id={recipe.Id}")">Edit</a> |
+            <a href="@($"/recipes")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Recipe? recipe;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        recipe = await context.Recipes.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (recipe is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

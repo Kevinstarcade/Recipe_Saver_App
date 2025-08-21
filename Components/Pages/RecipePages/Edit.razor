@@ -1,0 +1,154 @@
+﻿@page "/recipes/edit"
+@using Microsoft.EntityFrameworkCore
+@using Recipe_Saver_App.Models
+@inject IDbContextFactory<Recipe_Saver_App.Data.RecipesContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Recipe</h2>
+<hr />
+@if (Recipe is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Recipe" OnValidSubmit="UpdateRecipe" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Recipe.Id" value="@Recipe.Id" />
+                <div class="mb-3">
+                    <label for="recipename" class="form-label">RecipeName:</label>
+                    <InputText id="recipename" @bind-Value="Recipe.RecipeName" class="form-control" />
+                    <ValidationMessage For="() => Recipe.RecipeName" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="videourl" class="form-label">VideoUrl:</label>
+                    <InputText id="videourl" @bind-Value="Recipe.VideoUrl" class="form-control" />
+                    <ValidationMessage For="() => Recipe.VideoUrl" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="platform" class="form-label">Platform:</label>
+                    <InputText id="platform" @bind-Value="Recipe.Platform" class="form-control" />
+                    <ValidationMessage For="() => Recipe.Platform" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="cuisinetype" class="form-label">CuisineType:</label>
+                    <InputText id="cuisinetype" @bind-Value="Recipe.CuisineType" class="form-control" />
+                    <ValidationMessage For="() => Recipe.CuisineType" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="mealtype" class="form-label">MealType:</label>
+                    <InputText id="mealtype" @bind-Value="Recipe.MealType" class="form-control" />
+                    <ValidationMessage For="() => Recipe.MealType" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="caloriesperserving" class="form-label">CaloriesPerServing:</label>
+                    <InputNumber id="caloriesperserving" @bind-Value="Recipe.CaloriesPerServing" class="form-control" />
+                    <ValidationMessage For="() => Recipe.CaloriesPerServing" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="fatperserving" class="form-label">FatPerServing:</label>
+                    <InputNumber id="fatperserving" @bind-Value="Recipe.FatPerServing" class="form-control" />
+                    <ValidationMessage For="() => Recipe.FatPerServing" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="carbsperserving" class="form-label">CarbsPerServing:</label>
+                    <InputNumber id="carbsperserving" @bind-Value="Recipe.CarbsPerServing" class="form-control" />
+                    <ValidationMessage For="() => Recipe.CarbsPerServing" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="proteinperserving" class="form-label">ProteinPerServing:</label>
+                    <InputNumber id="proteinperserving" @bind-Value="Recipe.ProteinPerServing" class="form-control" />
+                    <ValidationMessage For="() => Recipe.ProteinPerServing" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="isfavourite" class="form-label">IsFavourite:</label>
+                    <InputNumber id="isfavourite" @bind-Value="Recipe.IsFavourite" class="form-control" />
+                    <ValidationMessage For="() => Recipe.IsFavourite" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="plantocook" class="form-label">PlanToCook:</label>
+                    <InputNumber id="plantocook" @bind-Value="Recipe.PlanToCook" class="form-control" />
+                    <ValidationMessage For="() => Recipe.PlanToCook" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="rating" class="form-label">Rating:</label>
+                    <InputNumber id="rating" @bind-Value="Recipe.Rating" class="form-control" />
+                    <ValidationMessage For="() => Recipe.Rating" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="lastmade" class="form-label">LastMade:</label>
+                    <InputDate id="lastmade" @bind-Value="Recipe.LastMade" class="form-control" />
+                    <ValidationMessage For="() => Recipe.LastMade" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Notes:</label>
+                    <InputText id="notes" @bind-Value="Recipe.Notes" class="form-control" />
+                    <ValidationMessage For="() => Recipe.Notes" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/recipes">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Recipe? Recipe { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Recipe ??= await context.Recipes.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Recipe is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateRecipe()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Recipe!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!RecipeExists(Recipe!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/recipes");
+    }
+
+    private bool RecipeExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Recipes.Any(e => e.Id == id);
+    }
+}
