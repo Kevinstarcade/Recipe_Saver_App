@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Recipe_Saver_App.Components;
 using Recipe_Saver_App.Data;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http.Json;
 
 // TODO: determine if I want to use ASP.NET and razor or if I follow the new Blazor path.
 
@@ -13,8 +14,17 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddRazorPages();
 
-builder.Services.AddDbContext<RecipesContext>(options =>
-    options.UseSqlite("Data Source = C:\\Users\\kevin\\source\\repos\\Recipe_Saver_App\\recipes.db"));
+// TODO: figure out how to handle cycles properly with EF Core and JSON serialization
+//builder.Services.Configure<JsonOptions>(options =>
+//{
+//    options.SerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+//});
+
+builder.Services.AddDbContextFactory<RecipesContext>(options =>
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("RecipesContext") ??
+        throw new InvalidOperationException(
+            "Connection string 'RecipesContext' not found.")));
 
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 
@@ -40,13 +50,3 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
-
-//using Recipe_Saver_App.Models;
-//using RecipesContext context = new RecipesContext();
-
-//Recipe LasagnaSoup = new Recipe()
-//{
-//    RecipeName = "Lasagna Soup"
-//};
-//context.Recipes.Add(LasagnaSoup);
-//context.SaveChanges();
