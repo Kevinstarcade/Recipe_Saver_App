@@ -3,6 +3,8 @@ using Recipe_Saver_App.Components;
 using Recipe_Saver_App.Data;
 using Microsoft.Extensions.DependencyInjection;
 
+// TODO: determine if I want to use ASP.NET and razor or if I follow the new Blazor path.
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
